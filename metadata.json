@@ -1,0 +1,6 @@
+{
+  "name": "SENA Inducción Interactiva | Ruta de Adaptación y Simulador del Aprendiz",
+  "description": "Plataforma gamificada de inducción para aprendices del SENA: módulos interactivos, modo oscuro con efecto blur, desafíos por niveles, pruebas rápidas y simulador de casos reales del Reglamento del Aprendiz (Versión 2024 con Acuerdo Complementario 2026).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
