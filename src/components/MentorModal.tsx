@@ -3,6 +3,7 @@ import { Bot, Send, X, Sparkles, Copy, Check } from 'lucide-react';
 import { askSenaAiMentor } from '../services/aiMentor';
 import { sound } from '../utils/audio';
 import { SenaLogo } from './SenaLogo';
+import { useLanguage } from '../context/LanguageContext';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -20,12 +21,29 @@ export const MentorModal: React.FC<MentorModalProps> = ({
   onClose,
   initialPrompt
 }) => {
+  const { t, language } = useLanguage();
+
+  const initialGreeting = language === 'en'
+    ? 'Hello, apprentice! I am your **SENA Virtual Tutor**. I am here to guide you through any questions regarding the **Apprentice Regulations (2024 Version with 2026 Agreement)**, ethical AI usage in coursework, SofiaPlus/Zajuna procedures, disciplinary infractions, or your productive internship stage. How can I assist you today?'
+    : '¡Hola, aprendiz! Soy tu **Tutor Virtual SENA**. Estoy aquí para orientarte en cualquier duda sobre el **Reglamento del Aprendiz (Versión 2024 con su Acuerdo Complementario de 2026)**, uso ético de Inteligencia Artificial en evidencias, novedades en SofiaPlus/Zajuna, faltas disciplinarias o tu etapa productiva. ¿En qué te puedo asesorar hoy?';
+
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: '¡Hola, aprendiz! Soy tu **Tutor Virtual SENA**. Estoy aquí para orientarte en cualquier duda sobre el **Reglamento del Aprendiz (Versión 2024 con su Acuerdo Complementario de 2026)**, uso ético de Inteligencia Artificial en evidencias, novedades en SofiaPlus/Zajuna, faltas disciplinarias o tu etapa productiva. ¿En qué te puedo asesorar hoy?'
+      content: initialGreeting
     }
   ]);
+
+  // When language switches, update first greeting if not yet chatted
+  useEffect(() => {
+    setMessages(prev => {
+      if (prev.length === 1 && prev[0].role === 'assistant') {
+        return [{ role: 'assistant', content: initialGreeting }];
+      }
+      return prev;
+    });
+  }, [language, initialGreeting]);
+
   const [inputQuery, setInputQuery] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
@@ -33,7 +51,13 @@ export const MentorModal: React.FC<MentorModalProps> = ({
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Suggested prompts
-  const suggestions = [
+  const suggestions = language === 'en' ? [
+    'How does the 2026 Agreement regulate AI in deliverables?',
+    'What happens if I miss 3 consecutive days unexcused?',
+    'Which behaviors constitute Very Serious Infractions?',
+    'What modalities are available for the Productive Stage?',
+    'How do I present my defense in an Evaluation Committee?'
+  ] : [
     '¿Cómo regula el Acuerdo 2026 el uso de IA en evidencias?',
     '¿Qué pasa si falto 3 días seguidos sin justificar?',
     '¿Cuáles conductas son consideradas faltas gravísimas?',
@@ -64,7 +88,7 @@ export const MentorModal: React.FC<MentorModalProps> = ({
     setIsLoading(true);
 
     try {
-      const reply = await askSenaAiMentor(text, newMessages);
+      const reply = await askSenaAiMentor(text, newMessages, language);
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
       sound.playSuccess();
     } catch {
@@ -72,7 +96,9 @@ export const MentorModal: React.FC<MentorModalProps> = ({
         ...prev,
         {
           role: 'assistant',
-          content: 'Ocurrió un error al consultar el reglamento. Recuerda que ante cualquier eventualidad, tu Coordinación Académica o Vocero de Ficha te brindarán atención presencial.'
+          content: language === 'en'
+            ? 'An error occurred while querying the regulations. In any event, Academic Coordination or your Class Vocero will provide in-person assistance.'
+            : 'Ocurrió un error al consultar el reglamento. Recuerda que ante cualquier eventualidad, tu Coordinación Académica o Vocero de Ficha te brindarán atención presencial.'
         }
       ]);
       sound.playError();
@@ -100,20 +126,24 @@ export const MentorModal: React.FC<MentorModalProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-white">Tutor SENA · Asesor del Reglamento</h3>
+                <h3 className="text-sm font-bold text-white">
+                  {language === 'en' ? 'SENA Tutor · Regulation Advisor' : 'Tutor SENA · Asesor del Reglamento'}
+                </h3>
                 <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.2 rounded font-semibold">
-                  Norma 2024-2026
+                  {language === 'en' ? 'Rules 2024-2026' : 'Norma 2024-2026'}
                 </span>
               </div>
               <p className="text-[11px] text-slate-300">
-                Reglamento del Aprendiz 2024 con Acuerdo Complementario 2026
+                {language === 'en' 
+                  ? 'Apprentice Regulations 2024 with 2026 Complementary Agreement'
+                  : 'Reglamento del Aprendiz 2024 con Acuerdo Complementario 2026'}
               </p>
             </div>
           </div>
 
           <button
             onClick={() => { sound.playClick(); onClose(); }}
-            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -148,8 +178,8 @@ export const MentorModal: React.FC<MentorModalProps> = ({
                   {!isUser && (
                     <button
                       onClick={() => handleCopy(msg.content, i)}
-                      title="Copiar respuesta"
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded bg-slate-100 dark:bg-slate-700 transition-opacity"
+                      title={language === 'en' ? 'Copy answer' : 'Copiar respuesta'}
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded bg-slate-100 dark:bg-slate-700 transition-opacity cursor-pointer"
                     >
                       {copiedIndex === i ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                     </button>
@@ -158,7 +188,7 @@ export const MentorModal: React.FC<MentorModalProps> = ({
 
                 {isUser && (
                   <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">
-                    Tú
+                    {language === 'en' ? 'You' : 'Tú'}
                   </div>
                 )}
               </div>
@@ -170,7 +200,11 @@ export const MentorModal: React.FC<MentorModalProps> = ({
               <div className="w-2 h-2 rounded-full bg-[#39A900] animate-bounce"></div>
               <div className="w-2 h-2 rounded-full bg-[#39A900] animate-bounce [animation-delay:0.2s]"></div>
               <div className="w-2 h-2 rounded-full bg-[#39A900] animate-bounce [animation-delay:0.4s]"></div>
-              <span>Consultando Reglamento 2024 y Acuerdo Complementario 2026...</span>
+              <span>
+                {language === 'en' 
+                  ? 'Consulting 2024 Regulations & 2026 Agreement...' 
+                  : 'Consultando Reglamento 2024 y Acuerdo Complementario 2026...'}
+              </span>
             </div>
           )}
 
@@ -181,13 +215,13 @@ export const MentorModal: React.FC<MentorModalProps> = ({
         <div className="px-4 py-2 bg-slate-100/70 dark:bg-slate-800/70 border-t border-slate-200 dark:border-slate-800 flex items-center gap-1.5 overflow-x-auto shrink-0">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 flex items-center gap-1">
             <Sparkles className="w-3 h-3 text-[#39A900]" />
-            Consultas 2024-2026:
+            {language === 'en' ? 'Suggested 2024-2026 queries:' : 'Consultas 2024-2026:'}
           </span>
           {suggestions.map((s, idx) => (
             <button
               key={idx}
               onClick={() => handleSendQuery(s)}
-              className="text-[11px] font-medium text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-slate-700 hover:bg-slate-200/60 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors shrink-0"
+              className="text-[11px] font-medium text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-slate-700 hover:bg-slate-200/60 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors shrink-0 cursor-pointer"
             >
               {s}
             </button>
@@ -207,7 +241,11 @@ export const MentorModal: React.FC<MentorModalProps> = ({
               type="text"
               value={inputQuery}
               onChange={(e) => setInputQuery(e.target.value)}
-              placeholder="Pregunta sobre deberes, IA en evidencias o normas del SENA 2024-2026..."
+              placeholder={
+                language === 'en'
+                  ? 'Ask about duties, AI in deliverables, or SENA 2024-2026 rules...'
+                  : 'Pregunta sobre deberes, IA en evidencias o normas del SENA 2024-2026...'
+              }
               className="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[#39A900] focus:bg-white dark:focus:bg-slate-800 transition-all placeholder:text-slate-400"
             />
             <button

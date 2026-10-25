@@ -1,25 +1,22 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { 
   Award, 
   Printer, 
   CheckCircle2, 
   Sparkles, 
-  ShieldCheck, 
   QrCode, 
-  Calendar, 
-  User, 
-  Building2, 
   AlertCircle,
   IdCard,
   FileSpreadsheet
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { ApprenticeProfile } from '../types';
-import { INDUCTION_MODULES } from '../data/modulesData';
-import { REGULATION_CASES } from '../data/casesData';
-import { BADGES, getLevelForXp } from '../data/badgesData';
+import { getInductionModules } from '../data/modulesData';
+import { getRegulationCases } from '../data/casesData';
+import { getBadges, getLevelForXp } from '../data/badgesData';
 import { sound } from '../utils/audio';
 import { SenaLogo } from './SenaLogo';
+import { useLanguage } from '../context/LanguageContext';
 
 interface CertificateViewProps {
   profile: ApprenticeProfile;
@@ -38,10 +35,15 @@ export const CertificateView: React.FC<CertificateViewProps> = ({
   userRole = 'aprendiz',
   instructorName = 'Blas Thorrens'
 }) => {
-  const currentLevel = getLevelForXp(profile.xp);
-  const totalModules = INDUCTION_MODULES.length;
+  const { t, language } = useLanguage();
+  const currentLevel = getLevelForXp(profile.xp, language);
+  const modules = getInductionModules(language);
+  const cases = getRegulationCases(language);
+  const badges = getBadges(language);
+
+  const totalModules = modules.length;
   const completedModules = profile.completedModuleIds.length;
-  const totalCases = REGULATION_CASES.length;
+  const totalCases = cases.length;
   const completedCases = profile.completedCaseIds.length;
 
   const isEligible = completedModules >= 4 && completedCases >= 3;
@@ -57,7 +59,7 @@ export const CertificateView: React.FC<CertificateViewProps> = ({
     window.print();
   };
 
-  const todayFormatted = new Date().toLocaleDateString('es-CO', {
+  const todayFormatted = new Date().toLocaleDateString(language === 'en' ? 'en-US' : 'es-CO', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
@@ -74,13 +76,15 @@ export const CertificateView: React.FC<CertificateViewProps> = ({
           <div className="max-w-2xl">
             <div className="flex items-center gap-2 text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider mb-1">
               <Award className="w-4 h-4 text-[#39A900]" />
-              Acreditación Institucional
+              {language === 'en' ? 'Institutional Accreditation' : 'Acreditación Institucional'}
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              Certificación de Inducción & Carnet Digital
+              {language === 'en' ? 'Induction Certification & Digital ID Card' : 'Certificación de Inducción & Carnet Digital'}
             </h2>
             <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">
-              Al completar los módulos interactivos y superar los casos del Tribunal Disciplinario, obtienes tu constancia oficial de inducción validada por el SENA.
+              {language === 'en'
+                ? 'Upon completing interactive modules and resolving Disciplinary Tribunal cases, you obtain your official induction credentials certified by SENA.'
+                : 'Al completar los módulos interactivos y superar los casos del Tribunal Disciplinario, obtienes tu constancia oficial de inducción validada por el SENA.'}
             </p>
           </div>
 
@@ -89,20 +93,20 @@ export const CertificateView: React.FC<CertificateViewProps> = ({
             {userRole === 'instructor' && onOpenGoogleSheets && (
               <button
                 onClick={() => { sound.playClick(); onOpenGoogleSheets(); }}
-                className="flex items-center gap-2 px-4 py-2.5 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 text-xs font-bold rounded-xl transition-all shadow-2xs"
+                className="flex items-center gap-2 px-4 py-2.5 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 text-xs font-bold rounded-xl transition-all shadow-2xs cursor-pointer"
                 title="Gestión de Hoja en Google Drive (Exclusivo Instructor)"
               >
                 <FileSpreadsheet className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                <span>Hoja en Drive</span>
+                <span>{language === 'en' ? 'Sheet on Drive' : 'Hoja en Drive'}</span>
               </button>
             )}
 
             <button
               onClick={() => { sound.playClick(); onOpenCarnet(); }}
-              className="flex items-center gap-2 px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-xl transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-xl transition-colors cursor-pointer"
             >
               <IdCard className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              <span>Ver Carnet Virtual</span>
+              <span>{language === 'en' ? 'View Digital ID' : 'Ver Carnet Virtual'}</span>
             </button>
 
             <button
@@ -115,7 +119,7 @@ export const CertificateView: React.FC<CertificateViewProps> = ({
               }`}
             >
               <Printer className="w-4 h-4" />
-              <span>Imprimir / Guardar PDF</span>
+              <span>{language === 'en' ? 'Print / Save PDF' : 'Imprimir / Guardar PDF'}</span>
             </button>
           </div>
         </div>
@@ -130,17 +134,22 @@ export const CertificateView: React.FC<CertificateViewProps> = ({
             )}
             <span className={isEligible ? 'text-emerald-900 dark:text-emerald-300 font-bold' : 'text-slate-600 dark:text-slate-400'}>
               {isEligible 
-                ? (isCompleteHonor ? '¡Aprobación con Honores de Excelencia SENA!' : 'Requisitos mínimos alcanzados: Certificado habilitado.')
-                : `Completa al menos 4 módulos (${completedModules}/${totalModules}) y 3 casos del Tribunal (${completedCases}/${totalCases}) para emitir tu certificado.`
+                ? (isCompleteHonor 
+                    ? (language === 'en' ? 'Approval with SENA Honors of Excellence!' : '¡Aprobación con Honores de Excelencia SENA!')
+                    : (language === 'en' ? 'Minimum requirements reached: Certificate enabled.' : 'Requisitos mínimos alcanzados: Certificado habilitado.'))
+                : (language === 'en'
+                    ? `Complete at least 4 modules (${completedModules}/${totalModules}) and 3 Tribunal cases (${completedCases}/${totalCases}) to issue your certificate.`
+                    : `Completa al menos 4 módulos (${completedModules}/${totalModules}) y 3 casos del Tribunal (${completedCases}/${totalCases}) para emitir tu certificado.`
+                  )
               }
             </span>
           </div>
 
           <button
             onClick={() => { sound.playClick(); onEditProfile(); }}
-            className="text-emerald-700 hover:text-emerald-900 underline font-semibold self-start sm:self-auto"
+            className="text-emerald-700 dark:text-emerald-400 hover:text-emerald-900 underline font-semibold self-start sm:self-auto cursor-pointer"
           >
-            Actualizar nombre o ficha
+            {language === 'en' ? 'Update name or cohort' : 'Actualizar nombre o ficha'}
           </button>
         </div>
       </div>
@@ -167,51 +176,64 @@ export const CertificateView: React.FC<CertificateViewProps> = ({
           </div>
 
           <p className="text-[11px] font-extrabold uppercase tracking-widest text-[#00324D] mt-2">
-            República de Colombia · Ministerio del Trabajo
+            {language === 'en' ? 'Republic of Colombia · Ministry of Labor' : 'República de Colombia · Ministerio del Trabajo'}
           </p>
           <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
             SERVICIO NACIONAL DE APRENDIZAJE - SENA
           </h1>
           <p className="text-xs font-semibold text-emerald-800 tracking-wide uppercase">
-            Dirección de Formación Profesional Integral · Sistema de Gestión de Calidad
+            {language === 'en'
+              ? 'Integral Professional Training Directorate · Quality Management System'
+              : 'Dirección de Formación Profesional Integral · Sistema de Gestión de Calidad'}
           </p>
         </div>
 
         {/* Certificate Body Text */}
         <div className="py-10 text-center space-y-6 relative z-10">
           <p className="text-xs uppercase tracking-widest text-slate-500 font-semibold">
-            Hace constar que el aprendiz
+            {language === 'en' ? 'Certifies that apprentice' : 'Hace constar que el aprendiz'}
           </p>
 
           <div className="space-y-1">
             <h2 className="text-2xl sm:text-4xl font-extrabold text-[#00324D] tracking-tight font-display">
-              {profile.name}
+              {profile.name || (language === 'en' ? 'APPRENTICE NAME' : 'NOMBRE DEL APRENDIZ')}
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 font-medium">
-              Identificado(a) con {profile.documentType} N° <strong className="text-slate-900">{profile.documentId || 'XXXXXXXX'}</strong>
+              {language === 'en' ? 'Identified with' : 'Identificado(a) con'} {profile.documentType} N° <strong className="text-slate-900">{profile.documentId || 'XXXXXXXX'}</strong>
             </p>
           </div>
 
           <p className="max-w-2xl mx-auto text-xs sm:text-sm text-slate-700 leading-relaxed">
-            Ha cursado y aprobado satisfactoriamente el programa integral de <strong>Inducción y Adaptación al Entorno Educativo SENA</strong>, habiendo demostrado idoneidad en la comprensión de la cultura institucional, valores éticos, el modelo de Formación Profesional Integral (FPI), y el régimen disciplinario del <strong>Reglamento del Aprendiz SENA (Versión 2024 con Acuerdo Complementario de 2026)</strong>.
+            {language === 'en'
+              ? <>Has satisfactorily completed and passed the comprehensive program of <strong>Induction and Adaptation to the SENA Educational Environment</strong>, having demonstrated competence in understanding institutional culture, ethical values, the Integral Vocational Training (FPI) model, and the disciplinary regime under the <strong>SENA Apprentice Regulations (2024 Version with 2026 Agreement)</strong>.</>
+              : <>Ha cursado y aprobado satisfactoriamente el programa integral de <strong>Inducción y Adaptación al Entorno Educativo SENA</strong>, habiendo demostrado idoneidad en la comprensión de la cultura institucional, valores éticos, el modelo de Formación Profesional Integral (FPI), y el régimen disciplinario del <strong>Reglamento del Aprendiz SENA (Versión 2024 con Acuerdo Complementario de 2026)</strong>.</>
+            }
           </p>
 
           {/* Program and Campus Details */}
           <div className="max-w-xl mx-auto bg-slate-50 border border-slate-200/80 rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-left text-xs">
             <div>
-              <span className="text-[10px] text-slate-400 uppercase font-bold block">Programa de Formación</span>
+              <span className="text-[10px] text-slate-400 uppercase font-bold block">
+                {language === 'en' ? 'Training Program' : 'Programa de Formación'}
+              </span>
               <span className="font-bold text-slate-900">{profile.program}</span>
             </div>
             <div>
-              <span className="text-[10px] text-slate-400 uppercase font-bold block">Ficha de Caracterización</span>
+              <span className="text-[10px] text-slate-400 uppercase font-bold block">
+                {language === 'en' ? 'Cohort Number' : 'Ficha de Caracterización'}
+              </span>
               <span className="font-mono font-bold text-emerald-800">{profile.ficha}</span>
             </div>
             <div>
-              <span className="text-[10px] text-slate-400 uppercase font-bold block">Regional SENA</span>
+              <span className="text-[10px] text-slate-400 uppercase font-bold block">
+                {language === 'en' ? 'SENA Regional' : 'Regional SENA'}
+              </span>
               <span className="font-semibold text-slate-800">{profile.regional}</span>
             </div>
             <div>
-              <span className="text-[10px] text-slate-400 uppercase font-bold block">Centro de Formación</span>
+              <span className="text-[10px] text-slate-400 uppercase font-bold block">
+                {language === 'en' ? 'Training Center' : 'Centro de Formación'}
+              </span>
               <span className="font-semibold text-slate-800">{profile.centro}</span>
             </div>
           </div>
@@ -220,13 +242,15 @@ export const CertificateView: React.FC<CertificateViewProps> = ({
         {/* Certificate Signatures & Verification */}
         <div className="pt-8 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-3 gap-6 items-end text-center relative z-10">
           
-          {/* Instructor Líder de Inducción Signature */}
+          {/* Instructor Signature */}
           <div className="space-y-1">
             <div className="w-36 h-10 border-b border-slate-400 mx-auto flex items-end justify-center pb-1 text-[#00324D] italic text-xs font-serif font-bold">
               {instructorName}
             </div>
             <p className="text-xs font-bold text-slate-900">{instructorName}</p>
-            <p className="text-[10px] text-slate-500">Instructor Líder de Inducción</p>
+            <p className="text-[10px] text-slate-500">
+              {language === 'en' ? 'Lead Induction Instructor' : 'Instructor Líder de Inducción'}
+            </p>
           </div>
 
           {/* QR Code Validation Stamp */}
@@ -236,17 +260,21 @@ export const CertificateView: React.FC<CertificateViewProps> = ({
               {verificationHash}
             </span>
             <span className="text-[9px] font-bold text-emerald-700 mt-0.5">
-              Firma Digital Verificada
+              {language === 'en' ? 'Verified Digital Signature' : 'Firma Digital Verificada'}
             </span>
           </div>
 
-          {/* Issue Date & Subdirector */}
+          {/* Issue Date */}
           <div className="space-y-1">
             <div className="w-36 h-10 border-b border-slate-400 mx-auto flex items-end justify-center pb-1 text-slate-400 italic text-xs font-serif">
               Certificado Digital SENA
             </div>
-            <p className="text-xs font-bold text-slate-900">Expedido el {todayFormatted}</p>
-            <p className="text-[10px] text-slate-500">Validez Nacional en SofiaPlus</p>
+            <p className="text-xs font-bold text-slate-900">
+              {language === 'en' ? `Issued on ${todayFormatted}` : `Expedido el ${todayFormatted}`}
+            </p>
+            <p className="text-[10px] text-slate-500">
+              {language === 'en' ? 'National Validity in SofiaPlus' : 'Validez Nacional en SofiaPlus'}
+            </p>
           </div>
 
         </div>
@@ -254,17 +282,19 @@ export const CertificateView: React.FC<CertificateViewProps> = ({
       </div>
 
       {/* Badges and Honors Showcase */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs no-print">
-        <h3 className="text-lg font-bold text-slate-900 mb-1 flex items-center gap-2">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-xs no-print transition-colors">
+        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-[#39A900]" />
-          Insignias de Logro & Medallero del Aprendiz
+          {language === 'en' ? 'Achievement Badges & Apprentice Medal Stand' : 'Insignias de Logro & Medallero del Aprendiz'}
         </h3>
-        <p className="text-xs text-slate-500 mb-6">
-          Reconocimientos ganados a lo largo de los módulos y expedientes del tribunal.
+        <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">
+          {language === 'en'
+            ? 'Honors and recognitions earned across induction modules and tribunal dockets.'
+            : 'Reconocimientos ganados a lo largo de los módulos y expedientes del tribunal.'}
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {BADGES.map((b) => {
+          {badges.map((b) => {
             const isUnlocked = profile.unlockedBadgeIds.includes(b.id) || 
                                (b.id === 'badge-bienvenida') ||
                                (b.id === 'badge-identidad' && profile.completedModuleIds.includes('mod-1')) ||
@@ -280,21 +310,21 @@ export const CertificateView: React.FC<CertificateViewProps> = ({
                 key={b.id}
                 className={`p-4 rounded-xl border transition-all flex items-start gap-3 ${
                   isUnlocked
-                    ? 'bg-emerald-50/50 border-emerald-200/90 text-slate-800'
-                    : 'bg-slate-50 border-slate-200 text-slate-400 opacity-60'
+                    ? 'bg-emerald-50/50 dark:bg-emerald-950/40 border-emerald-200/90 dark:border-emerald-800/60 text-slate-800 dark:text-slate-200'
+                    : 'bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-400 opacity-60'
                 }`}
               >
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                  isUnlocked ? 'bg-[#39A900] text-slate-950 font-bold' : 'bg-slate-200 text-slate-400'
+                  isUnlocked ? 'bg-[#39A900] text-slate-950 font-bold' : 'bg-slate-200 dark:bg-slate-700 text-slate-400'
                 }`}>
                   <Award className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-slate-900">{b.title}</h4>
-                  <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">{b.description}</p>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white">{b.title}</h4>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">{b.description}</p>
                   {isUnlocked && (
-                    <span className="text-[9px] font-bold text-emerald-800 bg-emerald-100/80 px-1.5 py-0.2 rounded mt-1.5 inline-block">
-                      Desbloqueada
+                    <span className="text-[9px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-100/80 dark:bg-emerald-900/60 px-1.5 py-0.2 rounded mt-1.5 inline-block">
+                      {language === 'en' ? 'Unlocked' : 'Desbloqueada'}
                     </span>
                   )}
                 </div>

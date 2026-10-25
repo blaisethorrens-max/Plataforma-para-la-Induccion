@@ -6,6 +6,7 @@
 import React, { useState } from 'react';
 import { ShieldCheck, Lock, ArrowRight, UserCheck, KeyRound, AlertCircle } from 'lucide-react';
 import { sound } from '../utils/audio';
+import { useLanguage } from '../context/LanguageContext';
 
 interface InstructorAccessModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ export const InstructorAccessModal: React.FC<InstructorAccessModalProps> = ({
   onClose,
   onSuccess
 }) => {
+  const { t } = useLanguage();
   const [pin, setPin] = useState('');
   const [error, setError] = useState(false);
 
@@ -50,7 +52,7 @@ export const InstructorAccessModal: React.FC<InstructorAccessModalProps> = ({
               <ShieldCheck className="w-5 h-5 text-emerald-400" />
             </div>
             <div>
-              <h3 className="font-bold text-base tracking-tight">Acceso Exclusivo de Instructor</h3>
+              <h3 className="font-bold text-base tracking-tight">{t('modal.accessTitle')}</h3>
               <p className="text-xs text-slate-300">Perfil: Blas Thorrens</p>
             </div>
           </div>
@@ -59,7 +61,7 @@ export const InstructorAccessModal: React.FC<InstructorAccessModalProps> = ({
               sound.playClick();
               onClose();
             }}
-            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors cursor-pointer"
           >
             ✕
           </button>
@@ -68,12 +70,12 @@ export const InstructorAccessModal: React.FC<InstructorAccessModalProps> = ({
         {/* Modal Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-            Ingresa tu clave de acceso para gestionar el panel de control del instructor, la sincronización de Google Drive y el seguimiento de aprendices:
+            {t('modal.accessPrompt')}
           </p>
 
           <div className="space-y-1.5">
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-              PIN / Clave de Acceso:
+              {t('modal.pinLabel')}
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -87,13 +89,13 @@ export const InstructorAccessModal: React.FC<InstructorAccessModalProps> = ({
                   setPin(e.target.value);
                   if (error) setError(false);
                 }}
-                placeholder="Ingresa PIN (ej: Sena 1234)"
+                placeholder={t('modal.pinPlaceholder')}
                 className="w-full pl-9 pr-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm font-mono outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
               />
             </div>
             {error && (
               <p className="text-xs text-red-500 flex items-center gap-1 font-medium mt-1">
-                <AlertCircle className="w-3.5 h-3.5" /> Clave incorrecta.
+                <AlertCircle className="w-3.5 h-3.5" /> {t('modal.pinError')}
               </p>
             )}
           </div>
@@ -109,15 +111,15 @@ export const InstructorAccessModal: React.FC<InstructorAccessModalProps> = ({
                 sound.playClick();
                 onClose();
               }}
-              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl transition-colors"
+              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl transition-colors cursor-pointer"
             >
-              Cancelar
+              {t('common.cancel')}
             </button>
             <button
               type="submit"
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#39A900] hover:bg-[#329600] text-slate-950 font-bold text-xs rounded-xl shadow-sm transition-all"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#39A900] hover:bg-[#329600] text-slate-950 font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer"
             >
-              <span>Ingresar como Instructor</span>
+              <span>{t('modal.enterInstructor')}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>

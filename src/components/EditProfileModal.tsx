@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, User, Save, RotateCcw } from 'lucide-react';
 import { ApprenticeProfile } from '../types';
 import { sound } from '../utils/audio';
+import { useLanguage } from '../context/LanguageContext';
 
 interface EditProfileModalProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
   profile,
   onSaveProfile
 }) => {
+  const { t } = useLanguage();
   if (!isOpen) return null;
 
   const [formData, setFormData] = useState({
@@ -45,7 +47,8 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
       ficha: '2874102',
       program: 'Tecnólogo en Análisis y Desarrollo de Software (ADSO)',
       regional: 'Regional Distrito Capital',
-      centro: 'Centro de Gestión de Mercados, Logística y TIC'
+      centro: 'Centro de Gestión de Mercados, Logística y TIC',
+      whatsappNumber: '+573001234567'
     });
   };
 
@@ -57,11 +60,11 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
         <div className="bg-[#00324D] dark:bg-[#002235] text-white p-5 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <User className="w-5 h-5 text-[#59C31C]" />
-            <h3 className="text-base font-bold text-white">Editar Datos del Aprendiz</h3>
+            <h3 className="text-base font-bold text-white">{t('edit.title')}</h3>
           </div>
           <button
             onClick={() => { sound.playClick(); onClose(); }}
-            className="p-1 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -71,7 +74,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
         <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs sm:text-sm">
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-              Nombre Completo del Aprendiz
+              {t('reg.fullName')}
             </label>
             <input
               type="text"
@@ -86,7 +89,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-                Tipo Doc.
+                {t('edit.docType')}
               </label>
               <select
                 value={formData.documentType}
@@ -102,7 +105,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
             <div className="col-span-2">
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-                Número de Documento
+                {t('reg.docId')}
               </label>
               <input
                 type="text"
@@ -118,7 +121,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-                N° de Ficha
+                {t('reg.ficha')}
               </label>
               <input
                 type="text"
@@ -132,7 +135,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
             <div className="col-span-2">
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-                Programa de Formación
+                {t('edit.program')}
               </label>
               <input
                 type="text"
@@ -147,7 +150,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-              Regional SENA
+              {t('edit.regional')}
             </label>
             <input
               type="text"
@@ -161,7 +164,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-              Centro de Formación
+              {t('edit.center')}
             </label>
             <input
               type="text"
@@ -175,7 +178,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-              Número de WhatsApp
+              {t('reg.whatsapp')}
             </label>
             <input
               type="tel"
@@ -192,26 +195,26 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
             <button
               type="button"
               onClick={handleResetDefaults}
-              className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
+              className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              Valores por defecto
+              {t('edit.defaults')}
             </button>
 
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => { sound.playClick(); onClose(); }}
-                className="px-4 py-2 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                className="px-4 py-2 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               >
-                Cancelar
+                {t('common.cancel')}
               </button>
               <button
                 type="submit"
-                className="flex items-center gap-1.5 px-5 py-2 bg-[#39A900] hover:bg-[#329600] text-slate-950 font-bold text-xs rounded-xl shadow-xs transition-transform hover:scale-102"
+                className="flex items-center gap-1.5 px-5 py-2 bg-[#39A900] hover:bg-[#329600] text-slate-950 font-bold text-xs rounded-xl shadow-xs transition-transform hover:scale-102 cursor-pointer"
               >
                 <Save className="w-4 h-4" />
-                Guardar Cambios
+                {t('common.save')}
               </button>
             </div>
           </div>

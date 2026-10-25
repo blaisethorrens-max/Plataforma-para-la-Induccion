@@ -23,6 +23,7 @@ import { INSTRUCTOR_DEFAULT, INITIAL_COHORT_STUDENTS, CohortApprentice } from '.
 import { ShieldCheck, Lock } from 'lucide-react';
 import { RoleSelection } from './components/RoleSelection';
 import { ApprenticeRegistration } from './components/ApprenticeRegistration';
+import { useLanguage } from './context/LanguageContext';
 
 const STORAGE_KEY = 'sena_induction_apprentice_v3';
 const THEME_KEY = 'sena_induction_theme';
@@ -44,10 +45,12 @@ const DEFAULT_PROFILE: ApprenticeProfile = {
   completedCaseIds: [],
   caseDecisions: {},
   unlockedBadgeIds: [],
-  quizHighScore: 0
+  quizHighScore: 0,
+  whatsappNumber: ''
 };
 
 export default function App() {
+  const { t } = useLanguage();
   const [roleSelected, setRoleSelected] = useState<boolean>(() => !!localStorage.getItem(ROLE_KEY));
   const [isRegistered, setIsRegistered] = useState<boolean>(() => !!localStorage.getItem(STORAGE_KEY));
   const [userRole, setUserRole] = useState<'instructor' | 'aprendiz'>(() => (localStorage.getItem(ROLE_KEY) as 'instructor' | 'aprendiz') || 'aprendiz');
@@ -207,8 +210,22 @@ export default function App() {
     <div className={`min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col antialiased transition-colors duration-300 ${isBlurActive ? 'screen-blur-effect' : ''}`}>
       {userRole === 'instructor' && (
         <div className="bg-slate-950 text-slate-200 border-b border-emerald-900/60 px-4 py-2 text-xs flex items-center justify-between shadow-inner">
-            <span className="font-bold">Instructor: {INSTRUCTOR_DEFAULT.name}</span>
-            <button onClick={() => { localStorage.clear(); window.location.reload(); }}>Cerrar Sesión</button>
+          <div className="flex items-center gap-2">
+            <span className="p-1 rounded bg-[#39A900] text-slate-950 font-bold">
+              <ShieldCheck className="w-3.5 h-3.5" />
+            </span>
+            <span className="font-bold text-white tracking-wide">
+              {t('bar.instructor')}: <strong className="text-emerald-400">{INSTRUCTOR_DEFAULT.name}</strong>
+            </span>
+            <span className="text-slate-500 hidden sm:inline">|</span>
+            <span className="text-slate-400 font-mono hidden sm:inline">{INSTRUCTOR_DEFAULT.email}</span>
+          </div>
+          <button 
+            onClick={() => { localStorage.clear(); window.location.reload(); }}
+            className="text-xs text-slate-400 hover:text-white underline transition-colors cursor-pointer"
+          >
+            {t('bar.logout')}
+          </button>
         </div>
       )}
       <Navbar
@@ -241,6 +258,40 @@ export default function App() {
           </>
         )}
       </main>
+
+      {/* Footer with institutional credits */}
+      <footer className="bg-slate-900 dark:bg-slate-950 text-slate-400 py-6 border-t border-slate-800 text-xs no-print">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3 text-center sm:text-left">
+            <div className="w-8 h-8 rounded-lg bg-slate-800 dark:bg-slate-900 border border-slate-700 flex items-center justify-center shrink-0">
+              <SenaLogo size={36} scale={0.7} color="#39A900" />
+            </div>
+            <div>
+              <p className="font-bold text-white">{t('footer.institution')}</p>
+              <p className="text-[11px] text-slate-400">
+                {t('footer.description')} · {t('bar.instructor')}: <strong>{INSTRUCTOR_DEFAULT.name}</strong>
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 text-[11px] flex-wrap justify-center">
+            {userRole === 'instructor' && (
+              <button
+                onClick={() => {
+                  if (window.confirm('¿Deseas reiniciar el progreso del prototipo? / Do you want to reset prototype progress?')) {
+                    sound.playClick();
+                    setProfile(DEFAULT_PROFILE);
+                    localStorage.removeItem(STORAGE_KEY);
+                  }
+                }}
+                className="text-slate-500 hover:text-red-400 transition-colors underline cursor-pointer"
+              >
+                {t('footer.resetPrototype')}
+              </button>
+            )}
+          </div>
+        </div>
+      </footer>
       <CarnetModal isOpen={isCarnetOpen} onClose={() => setIsCarnetOpen(false)} profile={profile} onEditProfile={() => { setIsCarnetOpen(false); setIsEditProfileOpen(true); }} />
       <MentorModal isOpen={isMentorOpen} onClose={() => setIsMentorOpen(false)} initialPrompt={mentorInitialPrompt} />
       <EditProfileModal isOpen={isEditProfileOpen} onClose={() => setIsEditProfileOpen(false)} profile={profile} onSaveProfile={handleSaveProfile} />

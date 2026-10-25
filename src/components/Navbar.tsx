@@ -21,6 +21,8 @@ import { getLevelForXp } from '../data/badgesData';
 import { sound } from '../utils/audio';
 import { SenaLogo } from './SenaLogo';
 import { ShieldCheck, UserCheck, Lock } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
+import { LanguageToggle } from './LanguageToggle';
 
 interface NavbarProps {
   activeTab: string;
@@ -53,15 +55,15 @@ export const Navbar: React.FC<NavbarProps> = ({
   onSwitchRole,
   onOpenInstructorLogin
 }) => {
+  const { t } = useLanguage();
   const currentLevel = getLevelForXp(profile.xp);
 
-
   const navItems = [
-    { id: 'modules', label: 'Ruta de Inducción', icon: BookOpen },
-    { id: 'cases', label: 'Tribunal del Reglamento', icon: Gavel, badge: 'Casos 2024-2026' },
-    { id: 'quiz', label: 'Desafíos por Niveles', icon: Zap },
-    { id: 'glossary', label: 'Glosario SENA', icon: Search },
-    { id: 'certificate', label: 'Carnet & Certificado', icon: Award }
+    { id: 'modules', label: t('nav.modules'), icon: BookOpen },
+    { id: 'cases', label: t('nav.cases'), icon: Gavel, badge: t('nav.casesBadge') },
+    { id: 'quiz', label: t('nav.quiz'), icon: Zap },
+    { id: 'glossary', label: t('nav.glossary'), icon: Search },
+    { id: 'certificate', label: t('nav.certificate'), icon: Award }
   ];
 
   const handleToggleSound = () => {
@@ -90,11 +92,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <div className="flex items-center gap-1.5">
                   <span className="font-extrabold text-slate-900 dark:text-white text-lg tracking-tight">SENA</span>
                   <span className="text-[10px] font-bold text-[#39A900] tracking-wider uppercase bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
-                    Inducción 2026
+                    {t('app.inductionYear')}
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                  Reglamento 2024 · Acuerdo 2026
+                  {t('app.regulation')}
                 </p>
               </div>
             </div>
@@ -142,17 +144,17 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Level Badge */}
             <div 
               onClick={onOpenCarnet}
-              title="Ver tu carnet y estado de nivel"
+              title={t('nav.viewCarnetTooltip')}
               className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200/70 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer transition-colors"
             >
               <div className="w-2 h-2 rounded-full bg-[#39A900] animate-pulse"></div>
-              <span>Nvl {currentLevel.level}: {currentLevel.badgeName}</span>
+              <span>{t('common.level')} {currentLevel.level}: {currentLevel.badgeName}</span>
             </div>
 
             {/* Streak */}
             <div className="hidden sm:flex items-center gap-1 px-2.5 py-1 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-lg text-amber-800 dark:text-amber-300 text-xs font-bold">
               <Flame className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-              <span>{profile.streakDays}d racha</span>
+              <span>{profile.streakDays}{t('common.streak')}</span>
             </div>
 
             {/* Digital ID Quick Button */}
@@ -161,9 +163,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                 sound.playClick();
                 onOpenCarnet();
               }}
-              title="Ver Carnet Digital SENA"
-              className="p-2 text-slate-600 dark:text-slate-300 hover:text-[#39A900] dark:hover:text-[#59C31C] hover:bg-emerald-50 dark:hover:bg-slate-800 rounded-lg transition-colors border border-transparent hover:border-emerald-200 dark:hover:border-slate-700"
-              aria-label="Carnet Digital"
+              title={t('nav.carnetDigital')}
+              className="p-2 text-slate-600 dark:text-slate-300 hover:text-[#39A900] dark:hover:text-[#59C31C] hover:bg-emerald-50 dark:hover:bg-slate-800 rounded-lg transition-colors border border-transparent hover:border-emerald-200 dark:hover:border-slate-700 cursor-pointer"
+              aria-label={t('nav.carnetDigital')}
             >
               <IdCard className="w-4 h-4" />
             </button>
@@ -176,16 +178,16 @@ export const Navbar: React.FC<NavbarProps> = ({
                     sound.playClick();
                     setActiveTab('instructor_dashboard');
                   }}
-                  className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     activeTab === 'instructor_dashboard'
                       ? 'bg-[#00324D] text-white shadow-xs'
                       : 'bg-emerald-100/80 dark:bg-emerald-950/80 text-emerald-900 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700 hover:bg-emerald-200/80'
                   }`}
-                  title="Panel de Control y Monitoreo del Instructor"
+                  title={t('nav.instructorDashboard')}
                 >
                   <ShieldCheck className="w-3.5 h-3.5 text-[#39A900]" />
-                  <span className="hidden sm:inline">Panel Instructor</span>
-                  <span className="sm:hidden">Instructor</span>
+                  <span className="hidden sm:inline">{t('nav.instructorDashboard')}</span>
+                  <span className="sm:hidden">{t('bar.instructor')}</span>
                 </button>
 
                 <button
@@ -193,9 +195,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                     sound.playClick();
                     onOpenGoogleSheets();
                   }}
-                  title="Almacenamiento de Aprendices en Google Drive & Sheets (Exclusivo Instructor)"
-                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-700/80 rounded-lg text-emerald-800 dark:text-emerald-300 text-xs font-bold transition-all shadow-2xs group"
-                  aria-label="Google Sheets en Drive"
+                  title={t('nav.googleDrive')}
+                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-700/80 rounded-lg text-emerald-800 dark:text-emerald-300 text-xs font-bold transition-all shadow-2xs group cursor-pointer"
+                  aria-label={t('nav.googleDrive')}
                 >
                   <FileSpreadsheet className="w-4 h-4 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform" />
                   <span className="hidden sm:inline">Google Drive</span>
@@ -208,20 +210,23 @@ export const Navbar: React.FC<NavbarProps> = ({
                   sound.playClick();
                   onOpenInstructorLogin();
                 }}
-                title="Acceso restringido para el Instructor Blas Thorrens"
-                className="flex items-center gap-1.5 px-2.5 py-1 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-lg text-xs font-medium transition-colors border border-slate-200 dark:border-slate-700"
+                title={t('nav.imInstructor')}
+                className="flex items-center gap-1.5 px-2.5 py-1 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-lg text-xs font-medium transition-colors border border-slate-200 dark:border-slate-700 cursor-pointer"
               >
                 <Lock className="w-3.5 h-3.5 text-slate-400" />
-                <span className="hidden sm:inline">Soy Instructor</span>
+                <span className="hidden sm:inline">{t('nav.imInstructor')}</span>
               </button>
             )}
+
+            {/* Language Switcher Button (ES <-> EN) */}
+            <LanguageToggle />
 
             {/* Sound Toggle */}
             <button
               onClick={handleToggleSound}
               title={soundEnabled ? 'Silenciar efectos sonoros' : 'Activar efectos sonoros'}
-              className="p-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-              aria-label="Sonido"
+              className="p-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+              aria-label={t('nav.soundToggle')}
             >
               {soundEnabled ? <Volume2 className="w-4 h-4 text-[#39A900]" /> : <VolumeX className="w-4 h-4 text-slate-400" />}
             </button>
@@ -229,13 +234,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* DARK MODE TOGGLE (UPPER RIGHT CORNER WITH SCREEN BLUR EFFECT) */}
             <button
               onClick={onToggleDarkMode}
-              title={darkMode ? 'Cambiar a modo claro (con efecto blur)' : 'Cambiar a modo oscuro (con efecto blur)'}
-              className={`p-2 rounded-xl transition-all duration-300 relative border ${
+              title={t('nav.darkModeToggle')}
+              className={`p-2 rounded-xl transition-all duration-300 relative border cursor-pointer ${
                 darkMode
                   ? 'bg-amber-400/10 text-amber-300 border-amber-400/30 hover:bg-amber-400/20 shadow-xs'
                   : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200 shadow-2xs'
               }`}
-              aria-label="Alternar Modo Oscuro"
+              aria-label={t('nav.darkModeToggle')}
             >
               {darkMode ? (
                 <Sun className="w-4 h-4 text-amber-400 animate-spin-slow" />
@@ -250,17 +255,17 @@ export const Navbar: React.FC<NavbarProps> = ({
                 sound.playClick();
                 onOpenMentor();
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#00324D] hover:bg-[#002538] dark:bg-[#002235] dark:hover:bg-[#001724] text-white text-xs font-bold rounded-lg shadow-sm transition-all hover:shadow border border-emerald-500/20"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#00324D] hover:bg-[#002538] dark:bg-[#002235] dark:hover:bg-[#001724] text-white text-xs font-bold rounded-lg shadow-sm transition-all hover:shadow border border-emerald-500/20 cursor-pointer"
             >
               <Bot className="w-4 h-4 text-[#59C31C]" />
-              <span className="hidden sm:inline">Tutor SENA</span>
+              <span className="hidden sm:inline">{t('nav.tutorSena')}</span>
             </button>
             <a
               href="https://www.youtube.com/@blasthorrensmendoza3413"
               target="_blank"
               rel="noopener noreferrer"
               className="p-2 text-slate-600 dark:text-slate-300 hover:text-red-500 transition-colors"
-              title="Visita mi canal de YouTube"
+              title={t('nav.youtubeTooltip')}
             >
               <Youtube className="w-5 h-5" />
             </a>

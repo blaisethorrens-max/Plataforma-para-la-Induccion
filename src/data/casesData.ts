@@ -1,4 +1,10 @@
 import { RegulationCase } from '../types';
+import { Language } from '../context/LanguageContext';
+import { REGULATION_CASES_EN } from './casesDataEn';
+
+export function getRegulationCases(lang: Language = 'es'): RegulationCase[] {
+  return lang === 'en' ? REGULATION_CASES_EN : REGULATION_CASES;
+}
 
 export const REGULATION_CASES: RegulationCase[] = [
   // ===================== FALTAS LEVES =====================

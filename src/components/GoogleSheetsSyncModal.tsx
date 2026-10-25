@@ -52,6 +52,7 @@ import {
   extractSpreadsheetId
 } from '../services/googleSheetsService';
 import { sound } from '../utils/audio';
+import { useLanguage } from '../context/LanguageContext';
 
 interface GoogleSheetsSyncModalProps {
   isOpen: boolean;
@@ -66,6 +67,8 @@ export const GoogleSheetsSyncModal: React.FC<GoogleSheetsSyncModalProps> = ({
   profile,
   onSyncSuccess
 }) => {
+  const { language, t } = useLanguage();
+  const isEn = language === 'en';
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -281,13 +284,17 @@ export const GoogleSheetsSyncModal: React.FC<GoogleSheetsSyncModalProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-xl font-bold tracking-tight">Almacenamiento en Google Drive & Sheets</h3>
+                <h3 className="text-xl font-bold tracking-tight">
+                  {isEn ? 'Google Drive & Sheets Storage' : 'Almacenamiento en Google Drive & Sheets'}
+                </h3>
                 <span className="bg-white/25 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                  Inducción 2024-2026
+                  {isEn ? 'Induction 2024-2026' : 'Inducción 2024-2026'}
                 </span>
               </div>
               <p className="text-xs text-emerald-50 text-slate-200">
-                Estructura de persistencia en tiempo real para aprendices, calificaciones del tribunal y certificados.
+                {isEn 
+                  ? 'Real-time cloud persistence for apprentices, regulations tribunal ratings, and digital certificates.'
+                  : 'Estructura de persistencia en tiempo real para aprendices, calificaciones del tribunal y certificados.'}
               </p>
             </div>
           </div>

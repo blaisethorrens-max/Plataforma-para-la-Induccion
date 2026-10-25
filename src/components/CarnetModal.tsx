@@ -1,9 +1,10 @@
 import React from 'react';
-import { X, Award, ShieldCheck, Printer, User } from 'lucide-react';
+import { X, Award } from 'lucide-react';
 import { ApprenticeProfile } from '../types';
 import { getLevelForXp } from '../data/badgesData';
 import { sound } from '../utils/audio';
 import { SenaLogo } from './SenaLogo';
+import { useLanguage } from '../context/LanguageContext';
 
 interface CarnetModalProps {
   isOpen: boolean;
@@ -18,9 +19,10 @@ export const CarnetModal: React.FC<CarnetModalProps> = ({
   profile,
   onEditProfile
 }) => {
+  const { t, language } = useLanguage();
   if (!isOpen) return null;
 
-  const currentLevel = getLevelForXp(profile.xp);
+  const currentLevel = getLevelForXp(profile.xp, language);
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
@@ -31,12 +33,12 @@ export const CarnetModal: React.FC<CarnetModalProps> = ({
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded-full bg-[#39A900] animate-pulse"></div>
             <span className="text-xs font-bold text-white tracking-wide uppercase">
-              Carnet Digital del Aprendiz SENA (2026)
+              {language === 'en' ? 'SENA Apprentice Digital ID (2026)' : 'Carnet Digital del Aprendiz SENA (2026)'}
             </span>
           </div>
           <button
             onClick={() => { sound.playClick(); onClose(); }}
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -62,8 +64,12 @@ export const CarnetModal: React.FC<CarnetModalProps> = ({
               </div>
 
               <div className="text-right">
-                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-300 block">Identificación</span>
-                <span className="text-xs font-extrabold text-[#59C31C]">APRENDIZ</span>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-300 block">
+                  {language === 'en' ? 'Identification' : 'Identificación'}
+                </span>
+                <span className="text-xs font-extrabold text-[#59C31C]">
+                  {language === 'en' ? 'APPRENTICE' : 'APRENDIZ'}
+                </span>
               </div>
             </div>
 
@@ -73,38 +79,46 @@ export const CarnetModal: React.FC<CarnetModalProps> = ({
               {/* Photo box */}
               <div className="w-20 h-24 rounded-xl bg-slate-800 border-2 border-[#39A900] flex flex-col items-center justify-center text-center p-1 relative shrink-0 shadow-md">
                 <span className="text-2xl font-black text-[#39A900]">
-                  {profile.name.charAt(0).toUpperCase()}
+                  {(profile.name || 'A').charAt(0).toUpperCase()}
                 </span>
                 <span className="text-[8px] font-semibold text-slate-400 mt-1 uppercase">SENA</span>
                 <div className="absolute -bottom-2 bg-emerald-500 text-[8px] font-bold text-slate-950 px-1.5 py-0.2 rounded-full">
-                  ACTIVO
+                  {language === 'en' ? 'ACTIVE' : 'ACTIVO'}
                 </div>
               </div>
 
               {/* Data fields */}
               <div className="flex-1 space-y-2 text-xs">
                 <div>
-                  <span className="text-[9px] text-slate-400 uppercase font-medium block">Nombres y Apellidos</span>
+                  <span className="text-[9px] text-slate-400 uppercase font-medium block">
+                    {language === 'en' ? 'Full Name' : 'Nombres y Apellidos'}
+                  </span>
                   <span className="font-bold text-white text-sm leading-tight block truncate">
-                    {profile.name}
+                    {profile.name || (language === 'en' ? 'Apprentice Name' : 'Nombre del Aprendiz')}
                   </span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <span className="text-[9px] text-slate-400 uppercase font-medium block">Documento</span>
+                    <span className="text-[9px] text-slate-400 uppercase font-medium block">
+                      {language === 'en' ? 'ID Number' : 'Documento'}
+                    </span>
                     <span className="font-mono font-bold text-emerald-300 text-xs">
                       {profile.documentType} {profile.documentId || 'XXXXXXXX'}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[9px] text-slate-400 uppercase font-medium block">Ficha</span>
+                    <span className="text-[9px] text-slate-400 uppercase font-medium block">
+                      {language === 'en' ? 'Cohort' : 'Ficha'}
+                    </span>
                     <span className="font-mono font-bold text-white text-xs">{profile.ficha}</span>
                   </div>
                 </div>
 
                 <div>
-                  <span className="text-[9px] text-slate-400 uppercase font-medium block">Programa</span>
+                  <span className="text-[9px] text-slate-400 uppercase font-medium block">
+                    {language === 'en' ? 'Program' : 'Programa'}
+                  </span>
                   <p className="text-[11px] font-semibold text-slate-200 line-clamp-2 leading-tight">
                     {profile.program}
                   </p>
@@ -116,7 +130,9 @@ export const CarnetModal: React.FC<CarnetModalProps> = ({
             {/* Bottom Bar: Barcode and Regional */}
             <div className="border-t border-white/15 pt-3 mt-4 flex items-center justify-between text-[10px] text-slate-300">
               <div>
-                <span className="block text-[8px] text-slate-400 uppercase">Centro / Regional</span>
+                <span className="block text-[8px] text-slate-400 uppercase">
+                  {language === 'en' ? 'Center / Regional' : 'Centro / Regional'}
+                </span>
                 <span className="font-medium text-white truncate max-w-[170px] block">
                   {profile.regional}
                 </span>
@@ -146,15 +162,19 @@ export const CarnetModal: React.FC<CarnetModalProps> = ({
             <div className="flex items-center gap-2">
               <Award className="w-4 h-4 text-[#39A900]" />
               <div>
-                <span className="font-bold text-slate-900 dark:text-white block">Nivel {currentLevel.level}: {currentLevel.title}</span>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400">{profile.xp} Puntos XP acumulados</span>
+                <span className="font-bold text-slate-900 dark:text-white block">
+                  {language === 'en' ? 'Level' : 'Nivel'} {currentLevel.level}: {currentLevel.title}
+                </span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                  {profile.xp} {language === 'en' ? 'Accumulated XP points' : 'Puntos XP acumulados'}
+                </span>
               </div>
             </div>
             <button
               onClick={() => { sound.playClick(); onEditProfile(); }}
-              className="text-xs text-emerald-700 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-300 font-bold underline"
+              className="text-xs text-emerald-700 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-300 font-bold underline cursor-pointer"
             >
-              Editar datos
+              {language === 'en' ? 'Edit details' : 'Editar datos'}
             </button>
           </div>
 
@@ -162,9 +182,9 @@ export const CarnetModal: React.FC<CarnetModalProps> = ({
           <div className="flex items-center justify-end gap-2 mt-5">
             <button
               onClick={() => { sound.playClick(); onClose(); }}
-              className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-colors"
+              className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer"
             >
-              Cerrar Carnet
+              {language === 'en' ? 'Close Digital ID' : 'Cerrar Carnet'}
             </button>
           </div>
         </div>

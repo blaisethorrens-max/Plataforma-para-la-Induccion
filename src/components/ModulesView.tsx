@@ -18,8 +18,9 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { InductionModule, ApprenticeProfile } from '../types';
-import { INDUCTION_MODULES } from '../data/modulesData';
+import { getInductionModules } from '../data/modulesData';
 import { sound } from '../utils/audio';
+import { useLanguage } from '../context/LanguageContext';
 
 interface ModulesViewProps {
   profile: ApprenticeProfile;
@@ -32,6 +33,7 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
   onCompleteModule,
   onGoToCases
 }) => {
+  const { t, language } = useLanguage();
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
   const [activeTopicIndex, setActiveTopicIndex] = useState<number>(0);
   const [quizState, setQuizState] = useState<{
@@ -46,7 +48,8 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
     score: 0
   });
 
-  const selectedModule = INDUCTION_MODULES.find(m => m.id === selectedModuleId);
+  const modules = getInductionModules(language);
+  const selectedModule = modules.find(m => m.id === selectedModuleId);
 
   // Icon mapping
   const getModuleIcon = (iconName: string) => {
@@ -136,18 +139,20 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
         <div className="flex items-center justify-between mb-6">
           <button
             onClick={() => { sound.playClick(); setSelectedModuleId(null); }}
-            className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 transition-colors shadow-2xs"
+            className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 transition-colors shadow-2xs cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4" />
-            Volver a la Ruta de Inducción
+            {t('common.back')}
           </button>
 
           <div className="flex items-center gap-2 text-xs">
-            <span className="font-medium text-slate-500 dark:text-slate-400">Módulo {selectedModule.number} de {INDUCTION_MODULES.length}</span>
+            <span className="font-medium text-slate-500 dark:text-slate-400">
+              {language === 'en' ? 'Module' : 'Módulo'} {selectedModule.number} / {modules.length}
+            </span>
             {isCompleted && (
               <span className="flex items-center gap-1 text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-full">
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                Completado
+                {t('common.completed')}
               </span>
             )}
           </div>
@@ -165,7 +170,7 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
                 <span aria-hidden="true">·</span>
                 <span className="flex items-center gap-1">
                   <Clock className="w-3 h-3" />
-                  {selectedModule.durationMinutes} min estimados
+                  {selectedModule.durationMinutes} {language === 'en' ? 'est. min' : 'min estimados'}
                 </span>
                 <span aria-hidden="true">·</span>
                 <span className="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-0.5">
@@ -196,7 +201,7 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
                       : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200/70 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'
                   }`}
                 >
-                  Tema {idx + 1}: {topic.title}
+                  {language === 'en' ? 'Topic' : 'Tema'} {idx + 1}: {topic.title}
                 </button>
               );
             })}
@@ -211,7 +216,7 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
               }`}
             >
               <Award className="w-3.5 h-3.5" />
-              Prueba Rápida ({selectedModule.quickQuiz.length} preg.)
+              {language === 'en' ? 'Quick Quiz' : 'Prueba Rápida'} ({selectedModule.quickQuiz.length} {language === 'en' ? 'questions' : 'preg.'})
             </button>
           </div>
         </div>
@@ -222,7 +227,9 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
             
             {/* Topic Header */}
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-[#39A900]">Tema {activeTopicIndex + 1}</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-[#39A900]">
+                {language === 'en' ? 'Topic' : 'Tema'} {activeTopicIndex + 1}
+              </span>
               <h3 className="text-xl font-bold text-slate-900 dark:text-white mt-1">{activeTopic.title}</h3>
               <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5">{activeTopic.subtitle}</p>
             </div>
@@ -238,14 +245,14 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
 
             {/* Key Highlights Card */}
             {activeTopic.keyHighlights && activeTopic.keyHighlights.length > 0 && (
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-2.5 flex items-center gap-1.5">
+              <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl p-4">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2.5 flex items-center gap-1.5">
                   <CheckSquare className="w-4 h-4 text-[#39A900]" />
-                  Puntos Clave para Recordar
+                  {language === 'en' ? 'Key Highlights to Remember' : 'Puntos Clave para Recordar'}
                 </h4>
                 <ul className="space-y-2">
                   {activeTopic.keyHighlights.map((hl, idx) => (
-                    <li key={idx} className="text-xs text-slate-700 flex items-start gap-2">
+                    <li key={idx} className="text-xs text-slate-700 dark:text-slate-300 flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#39A900] mt-1.5 shrink-0"></span>
                       <span>{hl}</span>
                     </li>
@@ -256,24 +263,28 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
 
             {/* Pro Tip Callout */}
             {activeTopic.proTip && (
-              <div className="bg-amber-50/80 border border-amber-200/80 rounded-xl p-4 flex items-start gap-3">
-                <div className="p-1.5 rounded-lg bg-amber-100 text-amber-800 shrink-0">
+              <div className="bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/60 rounded-xl p-4 flex items-start gap-3">
+                <div className="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/80 text-amber-800 dark:text-amber-200 shrink-0">
                   <Lightbulb className="w-4 h-4" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-amber-900">Consejo de Oro para el Aprendiz</p>
-                  <p className="text-xs text-amber-800 mt-0.5">{activeTopic.proTip}</p>
+                  <p className="text-xs font-bold text-amber-900 dark:text-amber-200">
+                    {language === 'en' ? 'Golden Tip for the Apprentice' : 'Consejo de Oro para el Aprendiz'}
+                  </p>
+                  <p className="text-xs text-amber-800 dark:text-amber-300 mt-0.5">{activeTopic.proTip}</p>
                 </div>
               </div>
             )}
 
             {/* Checklist */}
             {activeTopic.checklist && (
-              <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-4">
-                <p className="text-xs font-bold text-emerald-950 mb-2">Compromisos de Adaptación:</p>
+              <div className="bg-emerald-50/50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/60 rounded-xl p-4">
+                <p className="text-xs font-bold text-emerald-950 dark:text-emerald-200 mb-2">
+                  {language === 'en' ? 'Adaptation Commitments:' : 'Compromisos de Adaptación:'}
+                </p>
                 <div className="space-y-2">
                   {activeTopic.checklist.map((item, idx) => (
-                    <label key={idx} className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+                    <label key={idx} className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
                       <input type="checkbox" defaultChecked className="rounded text-[#39A900] focus:ring-[#39A900]" />
                       <span>{item}</span>
                     </label>
@@ -283,16 +294,16 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
             )}
 
             {/* Navigation buttons between topics */}
-            <div className="flex items-center justify-between border-t border-slate-100 pt-6">
+            <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-6">
               {activeTopicIndex > 0 ? (
                 <button
                   onClick={() => {
                     sound.playClick();
                     setActiveTopicIndex(activeTopicIndex - 1);
                   }}
-                  className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 transition-colors"
+                  className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                 >
-                  ← Tema Anterior
+                  {language === 'en' ? '← Previous Topic' : '← Tema Anterior'}
                 </button>
               ) : <div></div>}
 
@@ -302,18 +313,18 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
                     sound.playClick();
                     setActiveTopicIndex(activeTopicIndex + 1);
                   }}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-white bg-[#00324D] hover:bg-[#002235] transition-colors shadow-xs"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-white bg-[#00324D] dark:bg-slate-700 hover:bg-[#002235] dark:hover:bg-slate-600 transition-colors shadow-xs"
                 >
-                  <span>Siguiente Tema</span>
+                  <span>{language === 'en' ? 'Next Topic' : 'Siguiente Tema'}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               ) : (
                 <button
                   onClick={handleStartQuiz}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-slate-950 bg-[#39A900] hover:bg-[#329600] transition-transform hover:scale-102 shadow-md"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-slate-950 bg-[#39A900] hover:bg-[#329600] transition-transform hover:scale-102 shadow-md cursor-pointer"
                 >
                   <Award className="w-4 h-4" />
-                  <span>Realizar Evaluación del Módulo</span>
+                  <span>{language === 'en' ? 'Take Module Assessment' : 'Realizar Evaluación del Módulo'}</span>
                 </button>
               )}
             </div>
@@ -321,16 +332,20 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
           </div>
         ) : (
           /* Module Quick Quiz Mode */
-          <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xs space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
               <div>
-                <h3 className="text-xl font-bold text-slate-900">Evaluación Rápida del Módulo {selectedModule.number}</h3>
-                <p className="text-xs text-slate-500 mt-1">
-                  Responde correctamente para validar tus competencias y sumar +{selectedModule.xpReward} XP a tu perfil.
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                  {language === 'en' ? `Quick Assessment - Module ${selectedModule.number}` : `Evaluación Rápida del Módulo ${selectedModule.number}`}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  {language === 'en'
+                    ? `Answer correctly to validate your competencies and earn +${selectedModule.xpReward} XP for your profile.`
+                    : `Responde correctamente para validar tus competencias y sumar +${selectedModule.xpReward} XP a tu perfil.`}
                 </p>
               </div>
               <div className="text-right">
-                <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
+                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-3 py-1 rounded-full">
                   +{selectedModule.xpReward} XP
                 </span>
               </div>
@@ -344,25 +359,27 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
                 const isCorrect = selectedOpt === q.correctIndex;
 
                 return (
-                  <div key={q.id} className="bg-slate-50 border border-slate-200/90 rounded-xl p-5">
-                    <p className="text-sm font-bold text-slate-900 mb-3">
-                      <span className="text-emerald-700 mr-2">Pregunta {qIndex + 1}:</span>
+                  <div key={q.id} className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700 rounded-xl p-5">
+                    <p className="text-sm font-bold text-slate-900 dark:text-white mb-3">
+                      <span className="text-emerald-700 dark:text-emerald-400 mr-2">
+                        {language === 'en' ? 'Question' : 'Pregunta'} {qIndex + 1}:
+                      </span>
                       {q.question}
                     </p>
 
                     <div className="space-y-2">
                       {q.options.map((opt, optIndex) => {
-                        let btnStyle = 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100/70';
+                        let btnStyle = 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100/70 dark:hover:bg-slate-700';
 
                         if (hasAnswered && selectedOpt === optIndex) {
-                          btnStyle = 'bg-emerald-50 border-emerald-500 text-emerald-950 font-semibold ring-1 ring-emerald-500';
+                          btnStyle = 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-500 text-emerald-950 dark:text-emerald-200 font-semibold ring-1 ring-emerald-500';
                         }
 
                         if (quizState.submitted) {
                           if (optIndex === q.correctIndex) {
-                            btnStyle = 'bg-emerald-100 border-emerald-600 text-emerald-950 font-bold';
+                            btnStyle = 'bg-emerald-100 dark:bg-emerald-900/60 border-emerald-600 text-emerald-950 dark:text-emerald-200 font-bold';
                           } else if (selectedOpt === optIndex && !isCorrect) {
-                            btnStyle = 'bg-red-50 border-red-400 text-red-950 line-through';
+                            btnStyle = 'bg-red-50 dark:bg-red-950/50 border-red-400 text-red-950 dark:text-red-300 line-through';
                           }
                         }
 
@@ -373,7 +390,7 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
                             onClick={() => handleAnswerSelect(q.id, optIndex)}
                             className={`w-full text-left p-3 rounded-lg text-xs border transition-all flex items-start gap-2.5 ${btnStyle}`}
                           >
-                            <span className="w-5 h-5 rounded-md bg-slate-200/60 text-slate-700 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
+                            <span className="w-5 h-5 rounded-md bg-slate-200/60 dark:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
                               {String.fromCharCode(65 + optIndex)}
                             </span>
                             <span className="flex-1">{opt}</span>
@@ -384,9 +401,9 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
 
                     {/* Explanation when submitted */}
                     {quizState.submitted && (
-                      <div className={`mt-3 p-3 rounded-lg text-xs ${isCorrect ? 'bg-emerald-50/80 border border-emerald-200 text-emerald-900' : 'bg-amber-50/80 border border-amber-200 text-amber-900'}`}>
-                        <p className="font-semibold">{isCorrect ? '¡Correcto!' : 'Respuesta correcta:'}</p>
-                        <p className="mt-0.5 text-slate-700">{q.explanation}</p>
+                      <div className={`mt-3 p-3 rounded-lg text-xs ${isCorrect ? 'bg-emerald-50/80 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200' : 'bg-amber-50/80 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200'}`}>
+                        <p className="font-semibold">{isCorrect ? (language === 'en' ? 'Correct!' : '¡Correcto!') : (language === 'en' ? 'Correct answer:' : 'Respuesta correcta:')}</p>
+                        <p className="mt-0.5 text-slate-700 dark:text-slate-300">{q.explanation}</p>
                       </div>
                     )}
                   </div>
@@ -395,11 +412,13 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
             </div>
 
             {/* Submit Quiz Actions */}
-            <div className="border-t border-slate-100 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="border-t border-slate-100 dark:border-slate-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
               {!quizState.submitted ? (
                 <>
-                  <p className="text-xs text-slate-500">
-                    Respondidas {Object.keys(quizState.answers).length} de {selectedModule.quickQuiz.length} preguntas
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {language === 'en'
+                      ? `Answered ${Object.keys(quizState.answers).length} of ${selectedModule.quickQuiz.length} questions`
+                      : `Respondidas ${Object.keys(quizState.answers).length} de ${selectedModule.quickQuiz.length} preguntas`}
                   </p>
                   <button
                     disabled={Object.keys(quizState.answers).length < selectedModule.quickQuiz.length}
@@ -407,40 +426,42 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
                     className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all ${
                       Object.keys(quizState.answers).length === selectedModule.quickQuiz.length
                         ? 'bg-[#39A900] hover:bg-[#329600] text-slate-950 shadow-md hover:scale-102 cursor-pointer'
-                        : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                        : 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
                     }`}
                   >
-                    Calificar Evaluación
+                    {language === 'en' ? 'Submit Assessment' : 'Calificar Evaluación'}
                   </button>
                 </>
               ) : (
-                <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50 dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
                   <div>
-                    <p className="text-sm font-bold text-slate-900">
-                      Resultado: {quizState.score} de {selectedModule.quickQuiz.length} correctas
+                    <p className="text-sm font-bold text-slate-900 dark:text-white">
+                      {language === 'en'
+                        ? `Result: ${quizState.score} of ${selectedModule.quickQuiz.length} correct`
+                        : `Resultado: ${quizState.score} de ${selectedModule.quickQuiz.length} correctas`}
                     </p>
-                    <p className="text-xs text-slate-600 mt-0.5">
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
                       {quizState.score >= Math.ceil(selectedModule.quickQuiz.length * 0.6)
-                        ? '¡Excelente! Has alcanzado el Resultado de Aprendizaje (Aprobado - A).'
-                        : 'No alcanzaste el puntaje mínimo. Puedes repetir la evaluación para afianzar el conocimiento.'}
+                        ? (language === 'en' ? 'Excellent! You achieved the Learning Outcome (Approved - A).' : '¡Excelente! Has alcanzado el Resultado de Aprendizaje (Aprobado - A).')
+                        : (language === 'en' ? 'You did not achieve the passing score. You can retry the assessment to reinforce your learning.' : 'No alcanzaste el puntaje mínimo. Puedes repetir la evaluación para afianzar el conocimiento.')}
                     </p>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <button
                       onClick={handleStartQuiz}
-                      className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50"
+                      className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 cursor-pointer"
                     >
-                      Reintentar Quiz
+                      {language === 'en' ? 'Retry Quiz' : 'Reintentar Quiz'}
                     </button>
                     <button
                       onClick={() => {
                         sound.playClick();
                         setSelectedModuleId(null);
                       }}
-                      className="px-5 py-2 rounded-lg text-xs font-bold text-white bg-[#00324D] hover:bg-[#002235]"
+                      className="px-5 py-2 rounded-lg text-xs font-bold text-white bg-[#00324D] dark:bg-emerald-700 hover:bg-[#002235] dark:hover:bg-emerald-600 cursor-pointer"
                     >
-                      Continuar Ruta
+                      {language === 'en' ? 'Continue Path' : 'Continuar Ruta'}
                     </button>
                   </div>
                 </div>
@@ -464,23 +485,25 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
           <div className="max-w-2xl">
             <div className="flex items-center gap-2 text-xs text-emerald-800 dark:text-emerald-400 font-bold uppercase tracking-wider mb-2">
               <span className="w-2 h-2 rounded-full bg-[#39A900]"></span>
-              Plan Estructurado de Inducción 2026
+              {language === 'en' ? 'Structured Induction Plan 2026' : 'Plan Estructurado de Inducción 2026'}
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              Ruta Formativa del Aprendiz SENA
+              {language === 'en' ? 'SENA Apprentice Training Path' : 'Ruta Formativa del Aprendiz SENA'}
             </h2>
             <p className="text-slate-600 dark:text-slate-300 text-sm mt-2 leading-relaxed">
-              Supera cada uno de los 6 módulos diseñados para familiarizarte con la cultura institucional, las herramientas tecnológicas, los derechos, deberes y el régimen disciplinario actualizado (Reglamento 2024 con Acuerdo 2026). Acumula XP para ascender de nivel y desbloquear tu Certificado Oficial.
+              {language === 'en'
+                ? 'Complete each of the 6 modules designed to familiarize you with institutional culture, digital tools, rights, duties, and the updated disciplinary code (2024 Regulations with 2026 Agreement). Earn XP to level up and unlock your Official Certificate.'
+                : 'Supera cada uno de los 6 módulos diseñados para familiarizarte con la cultura institucional, las herramientas tecnológicas, los derechos, deberes y el régimen disciplinario actualizado (Reglamento 2024 con Acuerdo 2026). Acumula XP para ascender de nivel y desbloquear tu Certificado Oficial.'}
             </p>
           </div>
 
           <div className="shrink-0 flex flex-col gap-2">
             <button
               onClick={() => { sound.playClick(); onGoToCases(); }}
-              className="flex items-center justify-center gap-2 px-5 py-3 bg-[#00324D] hover:bg-[#002235] text-white text-xs font-bold rounded-xl shadow-md transition-all hover:scale-102 border border-emerald-500/20"
+              className="flex items-center justify-center gap-2 px-5 py-3 bg-[#00324D] hover:bg-[#002235] text-white text-xs font-bold rounded-xl shadow-md transition-all hover:scale-102 border border-emerald-500/20 cursor-pointer"
             >
               <Scale className="w-4 h-4 text-[#59C31C]" />
-              <span>Simulador de Casos del Reglamento</span>
+              <span>{language === 'en' ? 'Regulation Case Tribunal' : 'Simulador de Casos del Reglamento'}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -489,7 +512,7 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
 
       {/* Modules Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {INDUCTION_MODULES.map((module) => {
+        {modules.map((module) => {
           const isCompleted = profile.completedModuleIds.includes(module.id);
           
           return (
@@ -527,7 +550,7 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
 
                 {/* Subtitle / Category */}
                 <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                  Módulo {module.number} · {module.category}
+                  {language === 'en' ? 'Module' : 'Módulo'} {module.number} · {module.category}
                 </span>
 
                 {/* Title */}
@@ -545,11 +568,11 @@ export const ModulesView: React.FC<ModulesViewProps> = ({
               <div className="border-t border-slate-100 dark:border-slate-800 pt-4 mt-5 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
                 <span className="flex items-center gap-1 text-[11px]">
                   <Clock className="w-3.5 h-3.5 text-slate-400" />
-                  {module.durationMinutes} minutos
+                  {module.durationMinutes} {t('modules.durationMinutes')}
                 </span>
 
                 <span className="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1 group-hover:text-[#39A900] dark:group-hover:text-[#59C31C] transition-colors">
-                  {isCompleted ? 'Repasar módulo' : 'Iniciar módulo'}
+                  {isCompleted ? t('modules.reviewModule') : t('modules.startModule')}
                   <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
                 </span>
               </div>

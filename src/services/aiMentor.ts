@@ -85,7 +85,7 @@ Modalidades autorizadas vigentes:
   }
 ];
 
-export async function askSenaAiMentor(userQuery: string, history: ChatMessage[] = []): Promise<string> {
+export async function askSenaAiMentor(userQuery: string, history: ChatMessage[] = [], lang: 'es' | 'en' = 'es'): Promise<string> {
   const normalizedQuery = userQuery.toLowerCase().trim();
 
   // Try Gemini API first if configured
@@ -96,7 +96,13 @@ export async function askSenaAiMentor(userQuery: string, history: ChatMessage[] 
   if (apiKey && apiKey !== 'MY_GEMINI_API_KEY' && apiKey.length > 5) {
     try {
       const ai = new GoogleGenAI({ apiKey });
-      const systemInstruction = `Eres "Mentor SENA", el asesor oficial de inducción y régimen disciplinario del Servicio Nacional de Aprendizaje (SENA) en Colombia.
+      const systemInstruction = lang === 'en'
+        ? `You are "SENA Mentor", the official induction and disciplinary advisor of Colombia's National Apprenticeship Service (SENA).
+Your mission is to guide new technical and technological apprentices with empathy, clarity, and legal accuracy.
+Ground your answers on the SENA Apprentice Regulations (2024 Version with its 2026 Complementary Agreement), the Integral Professional Training (FPI) model, and technology policies.
+Clearly distinguish between minor (leves), serious (graves), and very serious (gravísimas) infractions. Explain ethical and transparent AI use in learning evidence, due process, SofiaPlus/Zajuna procedures, and productive stage modalities.
+Respond in fluent, friendly English using bold formatting and bullet points for effortless readability.`
+        : `Eres "Mentor SENA", el asesor oficial de inducción y régimen disciplinario del Servicio Nacional de Aprendizaje (SENA) en Colombia.
 Tu misión es orientar con empatía, claridad pedagógica y rigor legal a los nuevos aprendices técnicos y tecnólogos.
 Basa tus respuestas en el Reglamento del Aprendiz SENA Versión 2024 con su Acuerdo Complementario de 2026, el Estatuto de la Formación Profesional Integral (FPI), y los principios de modernización tecnológica e inclusión.
 Distingue con claridad entre faltas leves, graves y gravísimas. Explica el uso ético y transparente de la Inteligencia Artificial (IA) en evidencias de aprendizaje, el debido proceso, los trámites en SofiaPlus/Zajuna y las modalidades de etapa productiva presenciales y remotas.
@@ -125,7 +131,65 @@ Responde en español colombiano formal pero muy cercano, usando negritas y viñe
     }
   }
 
-  // Fallback to rich Colombian SENA knowledge engine
+  // English fallback responses
+  if (lang === 'en') {
+    if (normalizedQuery.includes('ia') || normalizedQuery.includes('ai') || normalizedQuery.includes('chatgpt') || normalizedQuery.includes('gemini') || normalizedQuery.includes('plagiarism') || normalizedQuery.includes('plagio')) {
+      return `The **2026 Complementary Agreement** expressly regulates the use of **Artificial Intelligence (AI)** at SENA:
+• **Permitted assistive use:** You may use generative AI tools for research, brainstorms, proofreading, and conceptual exploration.
+• **Mandatory disclosure:** You must declare AI usage in deliverables, cite the prompts used, and reference the model.
+• **Strict Prohibition (Serious Infraction):** Submitting code, reports, or projects created entirely by AI and claiming it as your own intellectual work is classified as **Academic Fraud and Plagiarism**. It leads to a Deficient (D) evaluative judgment and disciplinary hearing.
+
+📌 **Legal Basis:** 2026 Complementary Agreement on Ethical and Responsible Use of Emerging Technologies and AI in FPI.`;
+    }
+
+    if (normalizedQuery.includes('absent') || normalizedQuery.includes('3 day') || normalizedQuery.includes('dropout') || normalizedQuery.includes('desercion') || normalizedQuery.includes('medical') || normalizedQuery.includes('miss')) {
+      return `Pay close attention to absences under SENA 2024-2026 rules! Missing three (3) consecutive days without justified medical or force majeure reasons in person (or 3 consecutive weeks without submissions on Zajuna LMS) triggers the formal process of presumed **DROPOUT (Deserción)**.
+
+The official procedure:
+1. Instructor logs the absences in SofiaPlus.
+2. Academic Coordination notifies your institutional email granting five (5) business days to justify.
+3. If no EPS medical note or verified evidence is submitted, an administrative act cancels your enrollment with a nationwide **ban of 6 months to 2 years**.
+
+💡 **Key Tip:** You have a maximum of 3 business days following your return to submit medical certificates!
+
+📌 **Legal Basis:** SENA Apprentice Regulations 2024 & 2026 Agreement, Attendance and Dropout Regime.`;
+    }
+
+    if (normalizedQuery.includes('productive') || normalizedQuery.includes('internship') || normalizedQuery.includes('contract') || normalizedQuery.includes('practica') || normalizedQuery.includes('sponsor')) {
+      return `The Productive Stage certifies your vocational competencies in real industry. Under 2024-2026 rules, you have **up to two (2) years** after finishing your classroom schooling phase to complete and certify it.
+
+Authorized modalities:
+1. **Apprenticeship Contract (On-site or Hybrid/Remote):** Corporate sponsorship with a monthly stipend and health/workplace insurance (EPS/ARL).
+2. **Productive Project (Sennova / Fondo Emprender):** Developing applied research or creating your own verified startup.
+3. **Internship or Employment:** Formal role in a public or private company directly related to your study curriculum.
+4. **Institutional Monitoring:** Paid or educational technical assistant roles inside SENA centers.
+
+📌 **Legal Basis:** Apprentice Regulations 2024 Version and Productive Modernization Agreements 2026.`;
+    }
+
+    if (normalizedQuery.includes('due process') || normalizedQuery.includes('committee') || normalizedQuery.includes('hearing') || normalizedQuery.includes('appeal') || normalizedQuery.includes('descargo')) {
+      return `The Evaluation and Monitoring Committee strictly guarantees your constitutional **Due Process** (Article 29 of the Constitution & 2024 Regulations):
+1. **Prior formal summons:** At least three (3) business days in advance to your institutional email with copies of all allegations and evidence.
+2. **Defense hearing (Descargos):** Your fundamental right to be heard freely, submit counter-evidence, and be accompanied by your democratically elected Class Vocero.
+3. **Proportionality:** The committee prioritizes restorative pedagogical measures and improvement plans before considering severe sanctions.
+4. **Appeal for Reconsideration (Recurso de Reposición):** If the Center Subdirector issues a disciplinary sanction, you have ten (10) business days to formally appeal for review.
+
+📌 **Legal Basis:** SENA Apprentice Regulations 2024 with 2026 Agreement, Chapter on Disciplinary Due Process.`;
+    }
+
+    return `Hello, apprentice! As your SENA Regulation Advisor, I am here to guide you through induction and your campus vocational journey.
+
+Under the **SENA Apprentice Regulations (2024 Version and 2026 Complementary Agreement)**, training is focused on your holistic personal, civic, and technical success.
+
+You can ask me about:
+• How is Artificial Intelligence (AI) usage regulated in coursework (2026 Agreement)?
+• What happens if I miss 3 consecutive days of class? (Dropout prevention)
+• How do I request a deferral or voluntary withdrawal in SofiaPlus?
+• What is the difference between Minor, Serious, and Very Serious infractions?
+• What are the authorized modalities for the Productive Internship Stage?`;
+  }
+
+  // Fallback to rich Colombian SENA knowledge engine (Spanish)
   let bestMatch = null;
   let maxScore = 0;
 

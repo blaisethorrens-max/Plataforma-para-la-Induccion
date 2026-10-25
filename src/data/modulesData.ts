@@ -1,4 +1,10 @@
 import { InductionModule } from '../types';
+import { Language } from '../context/LanguageContext';
+import { INDUCTION_MODULES_EN } from './modulesDataEn';
+
+export function getInductionModules(lang: Language = 'es'): InductionModule[] {
+  return lang === 'en' ? INDUCTION_MODULES_EN : INDUCTION_MODULES;
+}
 
 export const INDUCTION_MODULES: InductionModule[] = [
   {
